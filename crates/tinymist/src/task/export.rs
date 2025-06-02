@@ -1,5 +1,7 @@
 //! The actor that handles various document export, like PDF and SVG export.
 
+use std::fs::File;
+use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::atomic::AtomicUsize;
@@ -9,7 +11,6 @@ use reflexo::ImmutPath;
 use reflexo_typst::{Bytes, CompilationTask, ExportComputation};
 use tinymist_project::LspWorld;
 use tinymist_std::error::prelude::*;
-use tinymist_std::fs::paths::write_atomic;
 use tinymist_std::typst::TypstDocument;
 use tinymist_task::{get_page_selection, ExportMarkdownTask, ExportTarget, PdfExport, TextExport};
 use tokio::sync::mpsc;
@@ -374,7 +375,9 @@ impl ExportTask {
         .await??;
 
         let to = write_to.clone();
-        tokio::task::spawn_blocking(move || write_atomic(to, data))
+        tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
+            Ok(File::create(to)?.write_all(data.as_slice())?)
+        })
             .await
             .context_ut("failed to export")??;
 

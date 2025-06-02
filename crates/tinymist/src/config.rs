@@ -17,14 +17,14 @@ use tinymist_query::analysis::{Modifier, TokenType};
 use tinymist_query::{CompletionFeat, PositionEncoding};
 use tinymist_render::PeriscopeArgs;
 use tinymist_std::error::prelude::*;
-use tinymist_task::ExportTarget;
+use tinymist_task::{ExportPngTask, ExportTarget, ExportTransform, Scalar};
 use typst::foundations::IntoValue;
 use typst::Features;
 use typst_shim::utils::LazyHash;
 
 use super::*;
 use crate::project::{
-    EntryResolver, ExportPdfTask, ExportTask, ImmutDict, PathPattern, ProjectResolutionKind,
+    EntryResolver, ExportTask, ImmutDict, PathPattern, ProjectResolutionKind,
     ProjectTask, TaskWhen,
 };
 use crate::world::font::FontResolverImpl;
@@ -507,7 +507,7 @@ impl Config {
         ExportTask {
             when: self.export_pdf.clone(),
             output: Some(self.output_path.clone()),
-            transform: vec![],
+            transform: vec![ExportTransform::Merge {gap: Some("5pt".to_string())}],
         }
     }
 
@@ -525,10 +525,10 @@ impl Config {
             //     }),
             //     ExportTarget::Html => ProjectTask::ExportHtml(ExportHtmlTask { export }),
             // },
-            task: ProjectTask::ExportPdf(ExportPdfTask {
+            task: ProjectTask::ExportPng(ExportPngTask {
                 export,
-                pdf_standards: self.pdf_standards().unwrap_or_default(),
-                creation_timestamp: self.creation_timestamp(),
+                ppi: Scalar::try_from(216f32).unwrap(),
+                fill: Some("#7f7f7f".into()),
             }),
             count_words: self.notify_status,
             development: self.development,
