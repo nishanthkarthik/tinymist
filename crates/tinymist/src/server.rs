@@ -191,6 +191,20 @@ impl ServerState {
             #[cfg(feature = "preview")]
             server.background_preview();
 
+	        if let Some(t) = &server.config.pin_file {
+	        	let mut t = t.clone();
+	        	if t.is_relative() {
+	        		if let Some(root) = server.config.entry_resolver.root(None) {
+	        			let p = std::mem::take(&mut t);
+	        			t = root.join(p);
+	        		}
+	        	}
+	        	log::info!("Pinning {}", t.display());
+	        	if let Err(e) = server.pin_main_file(Some(From::from(t))) {
+	        		log::warn!("Pinning failed: {e:?}");
+	        	}
+	        }
+
             // Run the cluster in the background after we referencing it
             client.handle.spawn(editor_actor.run());
         }

@@ -52,6 +52,7 @@ const CONFIG_ITEMS: &[&str] = &[
     "semanticTokens",
     "systemFonts",
     "typstExtraArgs",
+    "pinFile",
 ];
 // endregion Configuration Items
 
@@ -116,6 +117,8 @@ pub struct Config {
     pub export_pdf: TaskWhen,
     /// The output directory for PDF export.
     pub output_path: PathPattern,
+    /// Pinned file for export
+    pub pin_file: Option<PathBuf>,
 
     /// Dynamic configuration for the experimental formatter.
     pub formatter_mode: FormatterMode,
@@ -324,6 +327,7 @@ impl Config {
         assign_config!(entry_resolver.project_resolution := "projectResolution"?: ProjectResolutionKind);
         assign_config!(export_pdf := "exportPdf"?: TaskWhen);
         assign_config!(export_target := "exportTarget"?: ExportTarget);
+        assign_config!(pin_file := "pinFile"?: _);
         assign_config!(font_paths := "fontPaths"?: Vec<_>);
         assign_config!(formatter_mode := "formatterMode"?: FormatterMode);
         assign_config!(formatter_print_width := "formatterPrintWidth"?: Option<u32>);
@@ -527,7 +531,7 @@ impl Config {
             // },
             task: ProjectTask::ExportPng(ExportPngTask {
                 export,
-                ppi: Scalar::try_from(216f32).unwrap(),
+                ppi: Scalar::try_from(192f32).unwrap(),
                 fill: Some("#7f7f7f".into()),
             }),
             count_words: self.notify_status,
